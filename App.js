@@ -1,7 +1,7 @@
 import React from "react";
-import { createAppContainer, createSwitchNavigator } from "react-navigation";
-import { createStackNavigator } from "react-navigation-stack";
-import { createMaterialBottomTabNavigator } from "react-navigation-material-bottom-tabs";
+import { NavigationContainer } from "@react-navigation/native";
+import { createNativeStackNavigator } from "@react-navigation/native-stack";
+import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { ThemeProvider } from "react-native-elements";
 import rneTheme, { colors } from "./src/theme";
 import AccountScreen from "./src/screens/AccountScreen";
@@ -11,59 +11,72 @@ import TrackCreateScreen from "./src/screens/TrackCreateScreen";
 import TrackDetailScreen from "./src/screens/TrackDetailScreen";
 import TrackListScreen from "./src/screens/TrackListScreen";
 import { Provider as AuthProvider } from "./src/context/AuthContext";
-import { setNavigator } from "./src/navigationRef";
+import { navigationRef } from "./src/navigationRef";
 import ResolveAuthScreen from "./src/screens/ResolveAuthScreen";
 import { Provider as LocationProvider } from "./src/context/LocationContext";
 import { Provider as TrackProvider } from "./src/context/TrackContext";
 import { FontAwesome } from "@expo/vector-icons";
 
-const trackListFlow = createStackNavigator(
-  {
-    TrackList: TrackListScreen,
-    TrackDetail: TrackDetailScreen,
-  },
-  {
-    defaultNavigationOptions: {
-      headerStyle: {
-        backgroundColor: colors.surface,
-        elevation: 0,
-        shadowOpacity: 0,
-        borderBottomWidth: 0,
-      },
+const Stack = createNativeStackNavigator();
+const Tab = createBottomTabNavigator();
+
+const TrackListStack = () => (
+  <Stack.Navigator
+    screenOptions={{
+      headerStyle: { backgroundColor: colors.surface },
       headerTintColor: colors.textPrimary,
-      headerTitleStyle: { color: colors.textPrimary },
-      cardStyle: { backgroundColor: colors.background },
-    },
-  }
+      contentStyle: { backgroundColor: colors.background },
+    }}
+  >
+    <Stack.Screen
+      name="TrackList"
+      component={TrackListScreen}
+      options={{ title: "Tracks" }}
+    />
+    <Stack.Screen name="TrackDetail" component={TrackDetailScreen} />
+  </Stack.Navigator>
 );
 
-trackListFlow.navigationOptions = {
-  title: "Tracks",
-  tabBarIcon: <FontAwesome name="th-list" size={20} color="#fff" />,
-};
-
-const switchNavigator = createSwitchNavigator({
-  ResolveAuth: ResolveAuthScreen,
-  loginFlow: createStackNavigator({
-    Signup: SignupScreen,
-    Signin: SigninScreen,
-  }),
-  mainFlow: createMaterialBottomTabNavigator(
-    {
-      trackListFlow,
-      TrackCreate: TrackCreateScreen,
-      Account: AccountScreen,
-    },
-    {
-      shifting: true,
-      activeColor: "#fff",
-      inactiveColor: "#fff",
-      barStyle: { backgroundColor: colors.surface },
-    }
-  ),
-});
-
-const App = createAppContainer(switchNavigator);
+const MainTabs = () => (
+  <Tab.Navigator
+    screenOptions={{
+      headerStyle: { backgroundColor: colors.surface },
+      headerTintColor: colors.textPrimary,
+      tabBarActiveTintColor: "#fff",
+      tabBarInactiveTintColor: "#fff",
+      tabBarStyle: { backgroundColor: colors.surface },
+    }}
+  >
+    <Tab.Screen
+      name="Tracks"
+      component={TrackListStack}
+      options={{
+        tabBarIcon: ({ color, size }) => (
+          <FontAwesome name="th-list" color={color} size={size ?? 20} />
+        ),
+      }}
+    />
+    <Tab.Screen
+      name="TrackCreate"
+      component={TrackCreateScreen}
+      options={{
+        title: "Add Track",
+        tabBarIcon: ({ color, size }) => (
+          <FontAwesome name="plus" color={color} size={size ?? 20} />
+        ),
+      }}
+    />
+    <Tab.Screen
+      name="Account"
+      component={AccountScreen}
+      options={{
+        tabBarIcon: ({ color, size }) => (
+          <FontAwesome name="gear" color={color} size={size ?? 20} />
+        ),
+      }}
+    />
+  </Tab.Navigator>
+);
 
 export default () => {
   return (
@@ -71,11 +84,23 @@ export default () => {
       <LocationProvider>
         <AuthProvider>
           <ThemeProvider theme={rneTheme}>
-            <App
-              ref={(navigator) => {
-                setNavigator(navigator);
-              }}
-            />
+            <NavigationContainer ref={navigationRef}>
+              <Stack.Navigator screenOptions={{ headerShown: false }}>
+                <Stack.Screen
+                  name="ResolveAuth"
+                  component={ResolveAuthScreen}
+                />
+                <Stack.Screen name="loginFlow">
+                  {() => (
+                    <Stack.Navigator screenOptions={{ headerShown: false }}>
+                      <Stack.Screen name="Signup" component={SignupScreen} />
+                      <Stack.Screen name="Signin" component={SigninScreen} />
+                    </Stack.Navigator>
+                  )}
+                </Stack.Screen>
+                <Stack.Screen name="mainFlow" component={MainTabs} />
+              </Stack.Navigator>
+            </NavigationContainer>
           </ThemeProvider>
         </AuthProvider>
       </LocationProvider>

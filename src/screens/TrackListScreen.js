@@ -6,43 +6,45 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-import { NavigationEvents } from "react-navigation";
-import { ListItem } from "react-native-elements";
+import { useFocusEffect } from "@react-navigation/native";
+import { FontAwesome } from "@expo/vector-icons";
 import { Context as TrackContext } from "../context/TrackContext";
 import { colors, spacing, radius, shadows, layout } from "../theme";
 
 const TrackListScreen = ({ navigation }) => {
   const { state, fetchTracks } = useContext(TrackContext);
 
+  useFocusEffect(
+    React.useCallback(() => {
+      fetchTracks();
+      return () => {};
+    }, [fetchTracks])
+  );
+
   return (
     <View style={styles.screen}>
-      <NavigationEvents onWillFocus={fetchTracks} />
       <FlatList
         data={state}
         keyExtractor={(item) => item._id}
         renderItem={({ item }) => {
           return (
             <TouchableOpacity
-              key={item._id}
               onPress={() =>
                 navigation.navigate("TrackDetail", { _id: item._id })
               }
             >
               <View style={styles.card}>
-                <ListItem containerStyle={styles.listItem}>
-                  <ListItem.Content key={`content-${item._id}`}>
-                    <ListItem.Title style={styles.title}>
-                      {item.name}
-                    </ListItem.Title>
-                    <ListItem.Subtitle style={styles.subtitle}>
-                      Tap to view details
-                    </ListItem.Subtitle>
-                  </ListItem.Content>
-                  <ListItem.Chevron
-                    key={`chevron-${item._id}`}
+                <View style={styles.row}>
+                  <View style={styles.textWrapper}>
+                    <Text style={styles.title}>{item.name}</Text>
+                    <Text style={styles.subtitle}>Tap to view details</Text>
+                  </View>
+                  <FontAwesome
+                    name="chevron-right"
+                    size={18}
                     color={colors.textSecondary}
                   />
-                </ListItem>
+                </View>
               </View>
             </TouchableOpacity>
           );
@@ -54,12 +56,7 @@ const TrackListScreen = ({ navigation }) => {
   );
 };
 
-TrackListScreen.navigationOptions = {
-  title: "Tracks",
-  headerStyle: { backgroundColor: colors.surface },
-  headerTintColor: colors.textPrimary,
-  headerTitleStyle: { color: colors.textPrimary },
-};
+// v6 options are configured in navigators
 
 const styles = StyleSheet.create({
   screen: {
@@ -81,8 +78,17 @@ const styles = StyleSheet.create({
     overflow: "hidden",
     ...shadows.card,
   },
-  listItem: {
+  row: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.lg,
     backgroundColor: "transparent",
+  },
+  textWrapper: {
+    flexShrink: 1,
+    paddingRight: spacing.md,
   },
   title: {
     color: colors.textPrimary,

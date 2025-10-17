@@ -1,6 +1,6 @@
 import React, { useContext } from "react";
 import { Text, View, StyleSheet, Button } from "react-native";
-import { NavigationEvents } from "react-navigation";
+import { useFocusEffect } from "@react-navigation/native";
 import AuthForm from "../components/AuthForm";
 import NavLink from "../components/NavLink";
 import { Context } from "../context/AuthContext";
@@ -9,9 +9,15 @@ import { colors, layout, spacing } from "../theme";
 const SigninScreen = ({ navigation }) => {
   const { state, signin, clearErrorMessage } = useContext(Context);
 
+  useFocusEffect(
+    React.useCallback(() => {
+      clearErrorMessage();
+      return () => {};
+    }, [clearErrorMessage])
+  );
+
   return (
     <View style={styles.container}>
-      <NavigationEvents onWillFocus={clearErrorMessage} />
       <AuthForm
         headerText="Sign In to Your Account"
         errorMessage={state.errorMessage}

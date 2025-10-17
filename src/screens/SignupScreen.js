@@ -1,6 +1,6 @@
 import { useContext } from "react";
 import { View, StyleSheet } from "react-native";
-import { NavigationEvents } from "react-navigation";
+import { useFocusEffect } from "@react-navigation/native";
 import { Context as AuthContext } from "../context/AuthContext";
 import AuthForm from "../components/AuthForm";
 import NavLink from "../components/NavLink";
@@ -9,9 +9,15 @@ import { layout, spacing } from "../theme";
 const SignupScreen = ({ navigation }) => {
   const { state, signup, clearErrorMessage } = useContext(AuthContext);
 
+  useFocusEffect(
+    React.useCallback(() => {
+      clearErrorMessage();
+      return () => {};
+    }, [clearErrorMessage])
+  );
+
   return (
     <View style={styles.container}>
-      <NavigationEvents onWillFocus={clearErrorMessage} />
       <AuthForm
         headerText="Sign Up for TrailTrack"
         errorMessage={state.errorMessage}
