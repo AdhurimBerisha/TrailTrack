@@ -2,6 +2,8 @@ import React from "react";
 import { createAppContainer, createSwitchNavigator } from "react-navigation";
 import { createStackNavigator } from "react-navigation-stack";
 import { createMaterialBottomTabNavigator } from "react-navigation-material-bottom-tabs";
+import { ThemeProvider } from "react-native-elements";
+import rneTheme, { colors } from "./src/theme";
 import AccountScreen from "./src/screens/AccountScreen";
 import SigninScreen from "./src/screens/SigninScreen";
 import SignupScreen from "./src/screens/SignupScreen";
@@ -15,14 +17,29 @@ import { Provider as LocationProvider } from "./src/context/LocationContext";
 import { Provider as TrackProvider } from "./src/context/TrackContext";
 import { FontAwesome } from "@expo/vector-icons";
 
-const trackListFlow = createStackNavigator({
-  TrackList: TrackListScreen,
-  TrackDetail: TrackDetailScreen,
-});
+const trackListFlow = createStackNavigator(
+  {
+    TrackList: TrackListScreen,
+    TrackDetail: TrackDetailScreen,
+  },
+  {
+    defaultNavigationOptions: {
+      headerStyle: {
+        backgroundColor: colors.surface,
+        elevation: 0,
+        shadowOpacity: 0,
+        borderBottomWidth: 0,
+      },
+      headerTintColor: colors.textPrimary,
+      headerTitleStyle: { color: colors.textPrimary },
+      cardStyle: { backgroundColor: colors.background },
+    },
+  }
+);
 
 trackListFlow.navigationOptions = {
   title: "Tracks",
-  tabBarIcon: <FontAwesome name="th-list" size={20} />,
+  tabBarIcon: <FontAwesome name="th-list" size={20} color="#fff" />,
 };
 
 const switchNavigator = createSwitchNavigator({
@@ -31,11 +48,19 @@ const switchNavigator = createSwitchNavigator({
     Signup: SignupScreen,
     Signin: SigninScreen,
   }),
-  mainFlow: createMaterialBottomTabNavigator({
-    trackListFlow,
-    TrackCreate: TrackCreateScreen,
-    Account: AccountScreen,
-  }),
+  mainFlow: createMaterialBottomTabNavigator(
+    {
+      trackListFlow,
+      TrackCreate: TrackCreateScreen,
+      Account: AccountScreen,
+    },
+    {
+      shifting: true,
+      activeColor: "#fff",
+      inactiveColor: "#fff",
+      barStyle: { backgroundColor: colors.surface },
+    }
+  ),
 });
 
 const App = createAppContainer(switchNavigator);
@@ -45,11 +70,13 @@ export default () => {
     <TrackProvider>
       <LocationProvider>
         <AuthProvider>
-          <App
-            ref={(navigator) => {
-              setNavigator(navigator);
-            }}
-          />
+          <ThemeProvider theme={rneTheme}>
+            <App
+              ref={(navigator) => {
+                setNavigator(navigator);
+              }}
+            />
+          </ThemeProvider>
         </AuthProvider>
       </LocationProvider>
     </TrackProvider>

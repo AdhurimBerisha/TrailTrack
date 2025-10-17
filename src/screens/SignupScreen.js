@@ -4,6 +4,7 @@ import { NavigationEvents } from "react-navigation";
 import { Context as AuthContext } from "../context/AuthContext";
 import AuthForm from "../components/AuthForm";
 import NavLink from "../components/NavLink";
+import { layout, spacing } from "../theme";
 
 const SignupScreen = ({ navigation }) => {
   const { state, signup, clearErrorMessage } = useContext(AuthContext);
@@ -33,9 +34,10 @@ SignupScreen.navigationOptions = () => {
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
+    ...layout.screen,
     justifyContent: "center",
-    marginBottom: 250,
+    paddingHorizontal: spacing.lg,
+    paddingBottom: 250,
   },
 });
 

@@ -1,7 +1,8 @@
 import React, { useContext } from "react";
-import { StyleSheet, ActivityIndicator } from "react-native";
+import { StyleSheet, ActivityIndicator, View } from "react-native";
 import MapView, { Polyline, Circle } from "react-native-maps";
 import { Context as LocationContext } from "../context/LocationContext";
+import { colors, radius, shadows } from "../theme";
 
 const Map = () => {
   const {
@@ -18,26 +19,37 @@ const Map = () => {
   }
 
   return (
-    <MapView
-      style={styles.map}
-      initialRegion={{
-        ...initialLocation,
-        latitudeDelta: 0.01,
-        longitudeDelta: 0.01,
-      }}
-    >
-      <Circle
-        center={currentLocation.coords}
-        radius={30}
-        strokeColor="rgba(158,158,255,1.0)"
-        fillColor="rgba(158,158,255,0.3)"
-      />
-      <Polyline coordinates={locations.map((loc) => loc.coords)} />
-    </MapView>
+    <View style={styles.mapWrap}>
+      <MapView
+        style={styles.map}
+        initialRegion={{
+          ...initialLocation,
+          latitudeDelta: 0.01,
+          longitudeDelta: 0.01,
+        }}
+      >
+        <Circle
+          center={currentLocation.coords}
+          radius={30}
+          strokeColor="rgba(14,124,134,0.9)"
+          fillColor="rgba(14,124,134,0.25)"
+        />
+        <Polyline
+          strokeColor={colors.accent}
+          strokeWidth={3}
+          coordinates={locations.map((loc) => loc.coords)}
+        />
+      </MapView>
+    </View>
   );
 };
 
 const styles = StyleSheet.create({
+  mapWrap: {
+    borderRadius: radius.lg,
+    overflow: "hidden",
+    ...shadows.card,
+  },
   map: {
     height: 300,
   },

@@ -4,6 +4,7 @@ import { NavigationEvents } from "react-navigation";
 import AuthForm from "../components/AuthForm";
 import NavLink from "../components/NavLink";
 import { Context } from "../context/AuthContext";
+import { colors, layout, spacing } from "../theme";
 
 const SigninScreen = ({ navigation }) => {
   const { state, signin, clearErrorMessage } = useContext(Context);
@@ -33,9 +34,10 @@ SigninScreen.navigationOptions = () => {
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
+    ...layout.screen,
     justifyContent: "center",
-    marginBottom: 250,
+    paddingHorizontal: spacing.lg,
+    paddingBottom: 250,
   },
 });
 
