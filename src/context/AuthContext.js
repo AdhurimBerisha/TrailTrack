@@ -24,7 +24,7 @@ const tryLocalSignin = (dispatch) => async () => {
     dispatch({ type: "signin", payload: token });
     navigate("mainFlow");
   } else {
-    navigate("Signup");
+    navigate("loginFlow", { screen: "Signup" });
   }
 };
 
@@ -37,13 +37,38 @@ const signup =
   async ({ email, password }) => {
     try {
       const response = await trackerAPI.post("/signup", { email, password });
-      await AsyncStorage.setItem("token", response.data.token);
-      dispatch({ type: "signin", payload: response.data.token });
+      const token = response.data?.token || response.data?.data?.token;
+      if (!token) {
+        throw new Error("No token received from server");
+      }
+      await AsyncStorage.setItem("token", token);
+      dispatch({ type: "signin", payload: token });
       navigate("mainFlow");
     } catch (err) {
+      let errorMessage = "Something went wrong with sign up";
+      
+      if (err.response) {
+        // Server responded with error status
+        if (err.response.status === 404) {
+          errorMessage = "API endpoint not found. Please check your API_URL configuration and ensure the server is running.";
+        } else if (err.response.status === 400) {
+          errorMessage = err.response.data?.error || "Invalid email or password";
+        } else if (err.response.status === 401) {
+          errorMessage = err.response.data?.error || "Unauthorized";
+        } else {
+          errorMessage = err.response.data?.error || err.response.data?.message || `Server error: ${err.response.status}`;
+        }
+      } else if (err.request) {
+        // Request was made but no response
+        errorMessage = "Unable to reach server. Please check your API_URL and ensure the server is running.";
+      } else {
+        // Error in setting up request
+        errorMessage = err.message || errorMessage;
+      }
+      
       dispatch({
         type: "add_error",
-        payload: "Something went wrong with sign up",
+        payload: errorMessage,
       });
     }
   };
@@ -53,13 +78,38 @@ const signin =
   async ({ email, password }) => {
     try {
       const response = await trackerAPI.post("/signin", { email, password });
-      await AsyncStorage.setItem("token", response.data.token);
-      dispatch({ type: "signin", payload: response.data.token });
+      const token = response.data?.token || response.data?.data?.token;
+      if (!token) {
+        throw new Error("No token received from server");
+      }
+      await AsyncStorage.setItem("token", token);
+      dispatch({ type: "signin", payload: token });
       navigate("mainFlow");
     } catch (err) {
+      let errorMessage = "Something went wrong with sign in";
+      
+      if (err.response) {
+        // Server responded with error status
+        if (err.response.status === 404) {
+          errorMessage = "API endpoint not found. Please check your API_URL configuration and ensure the server is running.";
+        } else if (err.response.status === 400) {
+          errorMessage = err.response.data?.error || "Invalid email or password";
+        } else if (err.response.status === 401) {
+          errorMessage = err.response.data?.error || "Invalid credentials";
+        } else {
+          errorMessage = err.response.data?.error || err.response.data?.message || `Server error: ${err.response.status}`;
+        }
+      } else if (err.request) {
+        // Request was made but no response
+        errorMessage = "Unable to reach server. Please check your API_URL and ensure the server is running.";
+      } else {
+        // Error in setting up request
+        errorMessage = err.message || errorMessage;
+      }
+      
       dispatch({
         type: "add_error",
-        payload: "Something went wrong with sign in",
+        payload: errorMessage,
       });
     }
   };

@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import {
   Accuracy,
   requestForegroundPermissionsAsync,
@@ -7,6 +7,11 @@ import {
 
 export default (shouldTrack, callback) => {
   const [err, setErr] = useState(null);
+  const callbackRef = useRef(callback);
+
+  useEffect(() => {
+    callbackRef.current = callback;
+  }, [callback]);
 
   useEffect(() => {
     let subscriber;
@@ -22,7 +27,9 @@ export default (shouldTrack, callback) => {
             timeInterval: 1000,
             distanceInterval: 10,
           },
-          callback
+          (location) => {
+            callbackRef.current(location);
+          }
         );
       } catch (e) {
         setErr(e);
@@ -43,7 +50,7 @@ export default (shouldTrack, callback) => {
         subscriber.remove();
       }
     };
-  }, [shouldTrack, callback]);
+  }, [shouldTrack]);
 
   return [err];
 };
